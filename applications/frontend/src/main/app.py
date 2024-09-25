@@ -22,7 +22,7 @@ def echo_input():
         return "Empty input."
     elif len(input_text) > 100:
         return "Input too long."
-    elif not input_text.isalnum():
+    elif not input_text.replace(" ", "").isalnum():
         return "Input must be alphanumeric."
 
     return "You entered: " + input_text
