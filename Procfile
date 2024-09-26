@@ -1,1 +1,1 @@
-web: gunicorn src.app:app
+web: gunicorn applications.data-analyzer-server.src.app:app
