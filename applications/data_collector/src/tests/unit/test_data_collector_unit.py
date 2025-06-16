@@ -21,7 +21,7 @@ class TestDataCollector(unittest.TestCase):
         }
         mock_get.return_value = mock_res
 
-        data = self.collector.fetch_data(search="", count=2, num_calls=1, limit=0)
+        data = self.collector.fetch_data(search="", count=2, num_calls=1, delay=0)
         self.assertIsInstance(data, list)
         self.assertGreater(len(data), 0)
         self.assertEqual(data[1]["safetyreportid"], "4318221-5")

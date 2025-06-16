@@ -43,7 +43,7 @@ class AdverseEvent(db.Model):
 class Drug(db.Model):
     id = db.Column(db.Integer, primary_key=True)
     event_id = db.Column(db.String, db.ForeignKey('adverse_event.safety_report_id'))
-    drug_name = db.Column(db.String(100))
+    drug_name = db.Column(db.String(255))
     drug_indication = db.Column(db.String(200))
     drug_characterization = db.Column(db.String(10))
 
@@ -62,13 +62,13 @@ class DataCollector:
         self.api_key = api_key
         logging.info(f"DataCollector initialized.")
         
-    def fetch_data(self, search, count, num_calls, limit):
+    def fetch_data(self, search, count, num_calls, delay):
         """
         Fetch data from openFDA Drug Adverse Events API. 
 
         :param count: Number of records to return per API call (Max: 1000, default: 1).
         :param num_calls: Number of requests (Max: 240/min, 120,000/day with API key).
-        :param limit: Delay between requests (Min: 0.25 to satisfy Max num_calls).
+        :param delay: Delay between requests (Min: 0.25 to satisfy Max num_calls).
         :return: response data in JSON format.
         """
         logging.info("Fetching data from the API. . .")
@@ -78,7 +78,7 @@ class DataCollector:
             skip = i * count
             query_params = {
                 "search": search,
-                "limt": limit,
+                "limit": count,
                 "skip": skip,
                 "api_key": self.api_key,
             }
@@ -87,7 +87,7 @@ class DataCollector:
                 res = requests.get(self.base_endpoint, params=query_params)
                 batch = res.json().get("results", [])
                 combined_res.extend(batch)
-                time.sleep(limit)
+                time.sleep(delay)
                 
             except:
                 logging.error(f'Error fetching data from API.')
@@ -114,10 +114,10 @@ class DataCollector:
                 event = AdverseEvent(
                     safety_report_id = report_id,
                     received_date = datetime.strptime(entry["receivedate"], "%Y%m%d").date(),
-                    serious = entry.get("serious") == "1", # 1 if true 0 otherwise (false, null, etc)
-                    seriousness_death = entry.get("seriousnessdeath") == 1,
-                    patient_age = float(entry["patient"].get("patientonsetage")),
-                    patient_sex = {"1": "male", "2": "female"}.get(entry["patient"].get("patientsex")),
+                    serious = entry.get("serious", "0") == "1", # 1 if true 0 otherwise (false, null, etc)
+                    seriousness_death = entry.get("seriousnessdeath", "0") == 1,
+                    patient_age = float(entry["patient"].get("patientonsetage", 0)),
+                    patient_sex = {"1": "male", "2": "female"}.get(entry["patient"].get("patientsex", ""),"unknown"),
                 )
                 adverse_events.append(event)
 
@@ -125,7 +125,7 @@ class DataCollector:
                     drugs.append(Drug(
                         event_id=report_id, #FK
                         drug_characterization=drug.get("drugcharacterization"),
-                        drug_name = drug["medicinalproduct"],
+                        drug_name = drug.get("medicinalproduct", "UNKNOWN"),
                         drug_indication=drug.get("drugindication"),
                     ))
                 
@@ -165,16 +165,18 @@ if __name__ == "__main__":
 
     app = create_app()
     with app.app_context():
+        db.create_all()
+
         base_endpoint = "https://api.fda.gov/drug/event.json"
         search = "" # TODO
         count = 1000
         num_calls = 5
-        limit = 1
+        delay = 1
 
         collector = DataCollector(base_endpoint=base_endpoint, api_key=api_key)
-        raw_data = collector.fetch_data(search=search, count=count, num_calls=num_calls, limit=limit)
+        raw_data = collector.fetch_data(search=search, count=count, num_calls=num_calls, delay=delay)
 
-        # preprocess raw data if it exsists
+        # preprocess raw data if it exists
         if raw_data:
             events, drugs, reactions = collector.process_data(raw_data)
             collector.save_data(events, drugs, reactions)
