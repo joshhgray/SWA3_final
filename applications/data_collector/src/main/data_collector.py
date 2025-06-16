@@ -13,8 +13,8 @@ api_key = os.getenv("OPEN_FDA_KEY")
 app = Flask(__name__)
 
 # Manually fix URL - Heroku using deprecated postgres:// update to postgresql://
-raw_url = os.getenv("DATABASE_URL")
-if raw_url.startswith("postgres://"):
+raw_url = os.getenv("DATABASE_URL", "")
+if raw_url and raw_url.startswith("postgres://"):
     raw_url = raw_url.replace("postgres://", "postgresql://", 1)
 
 app.config['SQLALCHEMY_DATABASE_URI'] = raw_url
