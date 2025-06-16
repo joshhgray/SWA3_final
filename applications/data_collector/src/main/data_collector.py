@@ -16,9 +16,13 @@ def create_app():
     app = Flask(__name__)
 
     # Manually fix URL - Heroku using deprecated postgres:// update to postgresql://
-    raw_url = os.getenv("DATABASE_URL", "")
-    if raw_url and raw_url.startswith("postgres://"):
+    # Default to in-memory if non-existent (for testing)
+    raw_url = os.getenv("DATABASE_URL")
+    if not raw_url:
+        raw_url = "sqlite:///:memory:"
+    elif raw_url.startswith("postgres://"):
         raw_url = raw_url.replace("postgres://", "postgresql://", 1)
+
     app.config['SQLALCHEMY_DATABASE_URI'] = raw_url
     db.init_app(app)
 
