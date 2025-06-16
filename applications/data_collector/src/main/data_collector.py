@@ -10,16 +10,21 @@ import os
 load_dotenv()
 api_key = os.getenv("OPEN_FDA_KEY")
 
-app = Flask(__name__)
+db = SQLAlchemy()
 
-# Manually fix URL - Heroku using deprecated postgres:// update to postgresql://
-raw_url = os.getenv("DATABASE_URL", "")
-if raw_url and raw_url.startswith("postgres://"):
-    raw_url = raw_url.replace("postgres://", "postgresql://", 1)
+def create_app():
+    app = Flask(__name__)
 
-app.config['SQLALCHEMY_DATABASE_URI'] = raw_url
+    # Manually fix URL - Heroku using deprecated postgres:// update to postgresql://
+    raw_url = os.getenv("DATABASE_URL", "")
+    if raw_url and raw_url.startswith("postgres://"):
+        raw_url = raw_url.replace("postgres://", "postgresql://", 1)
+    app.config['SQLALCHEMY_DATABASE_URI'] = raw_url
+    db.init_app(app)
 
-db = SQLAlchemy(app)
+    return app
+
+
 class AdverseEvent(db.Model):
     safety_report_id = db.Column(db.String, primary_key=True)
     received_date = db.Column(db.Date)
@@ -153,17 +158,19 @@ class DataCollector:
     
 if __name__ == "__main__":
     logging.basicConfig(level=logging.INFO)
-    
-    base_endpoint = "https://api.fda.gov/drug/event.json"
-    search = "" # TODO
-    count = 1000
-    num_calls = 5
-    limit = 1
 
-    collector = DataCollector(base_endpoint=base_endpoint, api_key=api_key)
-    raw_data = collector.fetch_data(search=search, count=count, num_calls=num_calls, limit=limit)
+    app = create_app()
+    with app.app_context():
+        base_endpoint = "https://api.fda.gov/drug/event.json"
+        search = "" # TODO
+        count = 1000
+        num_calls = 5
+        limit = 1
 
-    # preprocess raw data if it exsists
-    if raw_data:
-        events, drugs, reactions = collector.process_data(raw_data)
-        collector.save_data(events, drugs, reactions)
+        collector = DataCollector(base_endpoint=base_endpoint, api_key=api_key)
+        raw_data = collector.fetch_data(search=search, count=count, num_calls=num_calls, limit=limit)
+
+        # preprocess raw data if it exsists
+        if raw_data:
+            events, drugs, reactions = collector.process_data(raw_data)
+            collector.save_data(events, drugs, reactions)

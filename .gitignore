@@ -4,4 +4,4 @@ venv/
 
 __pycache__/
 *.pkl
-.vscode/
+.vscode/venv/

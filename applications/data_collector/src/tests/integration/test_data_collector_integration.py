@@ -1,4 +1,4 @@
-from applications.data_collector.src.main.data_collector import db, AdverseEvent, Drug, Reaction, DataCollector
+from applications.data_collector.src.main.data_collector import db, create_app, AdverseEvent, Drug, Reaction, DataCollector
 from flask import Flask
 from flask_sqlalchemy import SQLAlchemy
 import unittest
@@ -8,11 +8,9 @@ class TestDataCollectorIntegration(unittest.TestCase):
         """
         Setup a temporary app and DB.
         """
-        self.app = Flask(__name__)
+        self.app = create_app()
         self.app.config['SQLALCHEMY_DATABASE_URI'] = 'sqlite:///:memory:'
         self.app.config['SQLALCHEMY_TRACK_MODIFICATIONS'] = False
-
-        db.init_app(self.app)
 
         with self.app.app_context():
             db.create_all()
