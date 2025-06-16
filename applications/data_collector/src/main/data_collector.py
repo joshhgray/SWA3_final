@@ -12,6 +12,9 @@ api_key = os.getenv("OPEN_FDA_KEY")
 
 db = SQLAlchemy()
 
+"""
+Create Flask app and connect to database
+"""
 def create_app():
     app = Flask(__name__)
 
@@ -28,7 +31,9 @@ def create_app():
 
     return app
 
-
+"""
+Build Database
+"""
 class AdverseEvent(db.Model):
     safety_report_id = db.Column(db.String, primary_key=True)
     received_date = db.Column(db.Date)
