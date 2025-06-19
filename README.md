@@ -13,7 +13,7 @@ source venv/bin/activate
 pip install -r requirements.txt
 ```
 
-3. Configure environment variables:
+3. Configure environment variables (Connect to openFDA and connect a database):
 ```bash
  OPEN_FDA_KEY=your_openfda_key # API key from openFDA
  DATABASE_URL=postgresql://your_db_url # PostgreSQL connect URI
