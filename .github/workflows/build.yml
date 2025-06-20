@@ -7,6 +7,10 @@ on:
 jobs:
     build:
         runs-on: ubuntu-latest
+
+        env:
+          OPEN_FDA_KEY: ${{ secrets.OPEN_FDA_KEY }}
+          DATABASE_URL: ${{ secrets.DATABASE_URL }}
         
         # set up mutli-version testing
         strategy:
@@ -22,7 +26,7 @@ jobs:
                   python-version: ${{ matrix.python-version }}
 
             # Set python path
-            - name: Set PTYHONPATH
+            - name: Set PYTHONPATH
               run: |
                 echo "PYTHONPATH=$(pwd)" >> $GITHUB_ENV
                 
@@ -34,8 +38,4 @@ jobs:
             - name: Run test
               run: |
                 pytest
-              
-            # TODO - set up environment variables
-            #- name: Set environment variables
-            #  run: |
-            #   export API_KEY=${{ secrets.API_KEY }}
+                python -m unittest discover
