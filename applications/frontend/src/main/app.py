@@ -1,28 +1,55 @@
 #!/usr/bin/env python3
 
-from flask import Flask, request
+import dash
+from dash import dcc, html, Input, Output, State
+import dash_bootstrap_components as dbc
+import requests
 
-app = Flask(__name__)
+app = dash.Dash(__name__, external_stylesheets=[dbc.themes.COSMO])
 
-@app.route("/")
-def main():
-    return '''
-     <form action="/echo_user_input" method="POST">
-         <input name="user_input">
-         <input type="submit" value="Submit!">
-     </form>
-     '''
+medical_disclaimer = html.Div(
+    [
+        dbc.Alert([
+            html.B("This application is for educational and demonstration purposes only. "),
+            "This application is for educational and demonstration purposes only. " \
+            " The data displayed is sourced from the openFDA public API and reflects " \
+            "real-world adverse event reports, but does NOT establish causation between " \
+            "any drug and reported outcomes.",
+            html.B(" Please note: This is NOT a medical tool "),
+            "- Do not use this application to make " \
+            "health-related decisions. For medical advice, diagnosis, or treatment, " \
+            "please consult a qualified healthcare professional."
+        ])
+    
+    ]
+)
 
-@app.route("/echo_user_input", methods=["POST"])
-def echo_input():
-    input_text = request.form.get("user_input", "")
+app.layout = dbc.Container([
+    # Header
+    dbc.Row([medical_disclaimer]),
+    html.H1("FDA adverse events explorer"),
 
-    # Input validation
-    if not input_text:
-        return "Empty input."
-    elif len(input_text) > 100:
-        return "Input too long."
-    elif not input_text.replace(" ", "").isalnum():
-        return "Input must be alphanumeric."
+    # Body
+    dcc.Input(id="drug-input", type="text", placeholder="Enter a drug name"),
+    dbc.Button("Submit", id="submit-button", color="primary", className="mb-2", size="lg"),
 
-    return "You entered: " + input_text
+    html.Div(id="output-container")
+])
+
+@app.callback(
+    [Output("output-container", "children"),
+     [Input("submit-button", "n_clicks")],
+     [State("drug-input", "value")]]
+)
+def update_output(n_clicks, drug_name):
+    if not drug_name:
+        return ""
+    
+    return [f"You searched for for: {drug_name}"]
+    
+    
+
+if __name__ == "__main__":
+    app.run(debug=True)
+
+
