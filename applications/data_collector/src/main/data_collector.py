@@ -15,18 +15,21 @@ db = SQLAlchemy()
 """
 Create Flask app and connect to database
 """
-def create_app():
+def create_app(test_config=None):
     app = Flask(__name__)
 
-    # Manually fix URL - Heroku using deprecated postgres:// update to postgresql://
-    # Default to in-memory if non-existent (for testing)
-    raw_url = os.getenv("DATABASE_URL")
-    if not raw_url:
-        raw_url = "sqlite:///:memory:"
-    elif raw_url.startswith("postgres://"):
-        raw_url = raw_url.replace("postgres://", "postgresql://", 1)
+    # load from test config (if passed in by tests)
+    if test_config and "SQLALCHEMY_DATABASE_URI" in test_config:
+        db_url = test_config["SQLALCHEMY_DATABASE_URI"]
+    else: # default
+        db_url = os.getenv("DATABASE_URL", "sqlite:///:memory:")
 
-    app.config['SQLALCHEMY_DATABASE_URI'] = raw_url
+    # Manually fix URL - Heroku using deprecated postgres:// update to postgresql://
+    if db_url.startswith("postgres://"):
+        db_url = db_url.replace("postgres://", "postgresql://", 1)
+
+    app.config['SQLALCHEMY_DATABASE_URI'] = db_url
+    app.config["SQLALCHEMY_TRACK_MODIFICATIONS"] = False
     db.init_app(app)
 
     return app

@@ -8,9 +8,7 @@ class TestDataCollectorIntegration(unittest.TestCase):
         """
         Setup a temporary app and DB.
         """
-        self.app = create_app()
-        self.app.config['SQLALCHEMY_DATABASE_URI'] = 'sqlite:///:memory:'
-        self.app.config['SQLALCHEMY_TRACK_MODIFICATIONS'] = False
+        self.app = create_app(testing=True)
 
         with self.app.app_context():
             db.create_all()
