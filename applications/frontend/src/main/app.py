@@ -61,7 +61,7 @@ def init_dash_app(server):
             Input("drug-dropdown", "id"),
             prevent_initial_call=False
     )
-    def populate_dropdown():
+    def populate_dropdown(_):
         try:
             res = requests.get(f"{BACKEND_API}/top-drugs?limit=50")
             if res.status_code == 200:
