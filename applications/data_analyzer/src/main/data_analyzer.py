@@ -16,7 +16,7 @@ def get_top_drugs(limit=50):
 
 def get_age_distribution_for_drug(drug_name):
     # split into age groups - based on MeSH - https://pmc.ncbi.nlm.nih.gov/articles/PMC1794003/
-    age_groups = case([
+    age_groups = case(
         (AdverseEvent.patient_age <= 2, "0-2"),
         (AdverseEvent.patient_age <= 5, "3-5"),
         (AdverseEvent.patient_age <= 12, "6-12"),
@@ -25,7 +25,7 @@ def get_age_distribution_for_drug(drug_name):
         (AdverseEvent.patient_age <= 64, "45-64"),
         (AdverseEvent.patient_age <= 79, "65-79"),
         (AdverseEvent.patient_age >=80, "80+"),
-    ], else_="unknown").label("age_group")
+    else_="unknown").label("age_group")
 
     results = (
         db.session.query(age_groups, func.count().label("count"))
@@ -41,7 +41,7 @@ def get_age_distribution_for_drug(drug_name):
 
 def get_top_reactions_by_age(drug_name):
     # split into age groups - based on MeSH - https://pmc.ncbi.nlm.nih.gov/articles/PMC1794003/
-    age_groups = case([
+    age_groups = case(
         (AdverseEvent.patient_age <= 2, "0-2"),
         (AdverseEvent.patient_age <= 5, "3-5"),
         (AdverseEvent.patient_age <= 12, "6-12"),
@@ -50,7 +50,7 @@ def get_top_reactions_by_age(drug_name):
         (AdverseEvent.patient_age <= 64, "45-64"),
         (AdverseEvent.patient_age <= 79, "65-79"),
         (AdverseEvent.patient_age >=80, "80+"),
-    ], else_="unknown").label("age_group")
+    else_="unknown").label("age_group")
 
     results = (
         db.session.query(age_groups, Reaction.reaction_medical_term, func.count().label("count"))
