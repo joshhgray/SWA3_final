@@ -1,7 +1,7 @@
 def init_dash_app(server):
     from dash import Dash, dcc, html, Input, Output, State
     import dash_bootstrap_components as dbc
-    from applications.data_analyzer.src.main.data_analyzer import get_top_drugs
+    from applications.data_analyzer.src.main.data_analyzer import get_top_drugs, get_top_reactions_by_age, get_age_distribution_for_drug
     from dotenv import load_dotenv
     import plotly.express as px
     import pandas as pd
@@ -70,5 +70,33 @@ def init_dash_app(server):
         except Exception as e:
             logging.error(f"Failed to fetch top drugs: {e}")
             return []
+        
+
+    @app.callback(
+        Output("age-chart", "figure"),
+        Output("reaction-chart", "figure"),
+        Input("drug-dropdown", "value")
+    )
+    def update_visuals(drug_name):
+        if not drug_name:
+            raise dash.exceptions.PreventUpdate
+        
+        age_data = get_age_distribution_for_drug(drug_name)
+        reaction_data = get_top_reactions_by_age(drug_name)
+
+        # Fallback
+        if not age_data or not reaction_data:
+            return px.bar(title="No data available"), px.bar(title="No data available")
+
+        df_age = pd.DataFrame(age_data)
+        df_reactions = pd.DataFrame([
+            {"age_group": key, "reaction": val["reaction"], "count": val["count"]}
+            for key, val in reaction_data.items()
+        ])
+
+        fig1 = px.bar(df_age, x="age_group", y="count", title="Age Distribution of Reports")
+        fig2 = px.bar(df_reactions, x="age_group", y="count", color="reaction", title="Top Reactions by Age Group")
+
+        return fig1, fig2
 
     return app
