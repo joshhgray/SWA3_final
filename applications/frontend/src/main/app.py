@@ -1,7 +1,7 @@
 def init_dash_app(server):
     from dash import Dash, dcc, html, Input, Output, State
     import dash_bootstrap_components as dbc
-    from data_analyzer.src.main.data_analyzer import get_top_drugs
+    from applications.data_analyzer.src.main.data_analyzer import get_top_drugs
     from dotenv import load_dotenv
     import plotly.express as px
     import pandas as pd
