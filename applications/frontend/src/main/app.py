@@ -6,6 +6,7 @@ import dash
 import os
 
 app = dash.Dash(__name__, external_stylesheets=[dbc.themes.COSMO])
+server = app.server
 
 medical_disclaimer = html.Div(
     [
