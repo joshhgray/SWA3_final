@@ -22,22 +22,6 @@ def init_dash_app(server):
 
     app = dash.Dash(__name__, server=server, external_stylesheets=[dbc.themes.COSMO])
 
-    # utility function to fetch top n(default 50) drugs
-    def fetch_top_drugs(limit=50):
-        try:
-            res = requests.get(f"{BACKEND_API}/drugs?limit={limit}")
-            if res.status_code == 200:
-                drug_names = res.json().get("drugs", [])
-                return [{"label": drug_name.title(), "value": drug_name} for drug_name in drug_names]
-            else:
-                print(f"Error fetching drugs: {res.status_code}")
-                return []
-
-        except Exception as e:
-            print(f"Error fetching drugs: {e}")
-            return []
-        
-    drug_options = fetch_top_drugs()
 
     medical_disclaimer = html.Div(
         [
@@ -64,7 +48,7 @@ def init_dash_app(server):
         # Body
         dcc.Dropdown(
             id="drug-dropdown",
-            options=drug_options,
+            options=[],
             placeholder="Select a drug",
             #style={"width": "50%", "margin-bottom": 20px}
         ),
@@ -73,14 +57,21 @@ def init_dash_app(server):
     ])
 
     @app.callback(
-        Output("output-container", "children"),
-        Input("drug-dropdown", "value"),
-        prevent_initial_call=True
+            Output("drug-dropdown", "options"),
+            Input("drug-dropdown", "id"),
+            prevent_initial_call=False
     )
-    def update_output(drug_name):
-        if not drug_name:
-            return ""
+    def populate_dropdown():
+        try:
+            res = requests.get(f"{BACKEND_API}/top-drugs?limit=50")
+            if res.status_code == 200:
+                drug_names = res.json().get("drugs", [])
+                return [{"label": drug.title(), "value": drug} for drug in drug_names]
+            else:
+                return []
         
-        return f"You selected: {drug_name}"
+        except Exception as e:
+            logging.error(f"Failed to fetch top drugs: {e}")
+            return []
 
     return app

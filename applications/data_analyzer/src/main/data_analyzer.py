@@ -19,25 +19,25 @@ def register_routes(app):
                     from scripts.populate_test_db import populate_test_db
                     populate_test_db(app)
 
-    """
-    Find the number of deaths associated with a given drug in the database
-    """
-    @app.route("/deaths-by-drugs/<drug_name>")
-    def deaths_by_drug(drug_name):
-        try:
-            count = db.session.query(AdverseEvent)\
-                .join(Drug)\
-                .filter(Drug.drug_name.ilike(f"%{drug_name}%"))\
-                .filter(AdverseEvent.seriousness_death == True)\
-                .count()
+    # """
+    # Find the number of deaths associated with a given drug in the database
+    # """
+    # @app.route("/deaths-by-drugs/<drug_name>")
+    # def deaths_by_drug(drug_name):
+    #     try:
+    #         count = db.session.query(AdverseEvent)\
+    #             .join(Drug)\
+    #             .filter(Drug.drug_name.ilike(f"%{drug_name}%"))\
+    #             .filter(AdverseEvent.seriousness_death == True)\
+    #             .count()
             
-            return jsonify({
-                "drug": drug_name, 
-                "associated_deaths": count
-                })
+    #         return jsonify({
+    #             "drug": drug_name, 
+    #             "associated_deaths": count
+    #             })
         
-        except Exception as e:
-            return jsonify({"Error": str(e)}), 500
+    #     except Exception as e:
+    #         return jsonify({"Error": str(e)}), 500
 
     """
     List all (or limit amount) of drugs in database
@@ -50,6 +50,28 @@ def register_routes(app):
 
             drugs = db.session.query(Drug.drug_name).distinct().order_by(Drug.drug_name).limit(limit).all()
             drugs_list = [drug[0] for drug in drugs if drug[0]]
+            return jsonify({"drugs": drugs_list})
+
+        except Exception as e:
+            return jsonify({"Error": str(e)}), 500
+        
+    """
+    Get the top 50 most common drugs in the database.
+    """
+    @app.route("/top-drugs")
+    def top_drugs():
+        try:
+            limit = request.args.get("limit", default=50, type=int)
+
+            results = (
+                db.session.query(Drug.drug_name, func.count().label("count"))
+                .group_by(Drug.drug_name)
+                .order_by(desc("count"))
+                .limit(limit)
+                .all()
+            )
+
+            drugs_list = [drug[0] for drug in results]
             return jsonify({"drugs": drugs_list})
 
         except Exception as e:
