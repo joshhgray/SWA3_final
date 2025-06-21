@@ -54,6 +54,10 @@ def init_dash_app(server):
             #style={"width": "50%", "margin-bottom": 20px}
         ),
 
+        # Visualizations
+        dcc.Graph(id="age-chart")
+        dcc.Graph(id="reaction-chart")
+
         html.Div(id="output-container")
     ])
 
