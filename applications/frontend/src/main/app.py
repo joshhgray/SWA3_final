@@ -55,8 +55,8 @@ def init_dash_app(server):
         ),
 
         # Visualizations
-        dcc.Graph(id="age-chart")
-        dcc.Graph(id="reaction-chart")
+        dcc.Graph(id="age-chart"),
+        dcc.Graph(id="reaction-chart"),
 
         html.Div(id="output-container")
     ])
