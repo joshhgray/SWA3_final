@@ -18,7 +18,9 @@ Create Flask app and connect to database
 def create_app(testing=False):
     app = Flask(__name__)
 
-    # load from test config (if passed in by tests)
+    # Check testing mode
+    if testing is None: # get from env if not passed
+        testing = os.getenv("TESTING", "false").lower() == "true"
     if testing:
         app.config['SQLALCHEMY_DATABASE_URI'] = "sqlite:///:memory:"
     else: # default 
@@ -31,7 +33,7 @@ def create_app(testing=False):
         app.config['SQLALCHEMY_DATABASE_URI'] = db_url
 
     app.config["SQLALCHEMY_TRACK_MODIFICATIONS"] = False
-    app.config["TESTIGN"] = testing
+    app.config["TESTING"] = testing
 
     db.init_app(app)
     return app

@@ -3,8 +3,17 @@ from flask import Flask, request, jsonify
 from sqlalchemy import case, func, desc
 import os
 
-app = create_app()
+app = create_app(testing=True)
 app.app_context().push()
+
+if app.config["TESTING"] or os.getenv("TESTING") == "true":
+    with app.app_context():
+        db.create_all()
+    
+        # populate test database if empty
+        if not db.session.query(Drug).first():
+            from scripts.populate_test_db import populate_test_db
+            populate_test_db(app)
 
 """
 Find the number of deaths associated with a given drug in the database
@@ -114,7 +123,7 @@ def drug_by_age_groups(drug_name):
             db.session.query(age_groups, func.count().label("count"))
             .select_from(AdverseEvent)
             .join(Drug, Drug.event_id == AdverseEvent.safety_report_id)
-            .filter(Drug.drug_name.ilkike(f"%{drug_name}%"))
+            .filter(Drug.drug_name.ilike(f"%{drug_name}%"))
             .group_by(age_groups)
             .order_by(age_groups)
             .all()
@@ -132,7 +141,7 @@ def drug_by_age_groups(drug_name):
 Show top reactions per age group for a given drug
 """
 @app.route("/top-reactions-by-age/<drug_name>")
-def drug_by_age_groups(drug_name):
+def top_reactions_by_age(drug_name):
     try:
         # split into age groups - based on MeSH - https://pmc.ncbi.nlm.nih.gov/articles/PMC1794003/
         age_groups = case([
@@ -171,11 +180,3 @@ def drug_by_age_groups(drug_name):
 
 if __name__ == "__main__":
     app.run(debug=True, port=5050)
-    
-
-    # @app.route('/analyze', methods=['POST'])
-# def analyze_data():
-#     try:
-#         input_data = request.get_json()
-#     except Exception as e:
-#         return jsonify({"error": str(e)}), 500
