@@ -20,8 +20,7 @@ def init_dash_app(server):
         BACKEND_API = os.getenv("BACKEND_API", "https://swa-5ae147d163b6.herokuapp.com/")
     logging.info(f"Using BACKEND_API = {BACKEND_API}")
 
-    app = dash.Dash(__name__, external_stylesheets=[dbc.themes.COSMO])
-    server = app.server
+    app = dash.Dash(__name__, server=server, external_stylesheets=[dbc.themes.COSMO])
 
     # utility function to fetch top n(default 50) drugs
     def fetch_top_drugs(limit=50):
