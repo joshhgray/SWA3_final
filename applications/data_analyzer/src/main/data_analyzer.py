@@ -54,7 +54,9 @@ def get_top_reactions_by_age(drug_name):
 
     results = (
         db.session.query(age_groups, Reaction.reaction_medical_term, func.count().label("count"))
+        .select_from(AdverseEvent)
         .join(Drug, Drug.event_id == AdverseEvent.safety_report_id)
+        .join(Reaction, Reaction.event_id == AdverseEvent.safety_report_id)
         .filter(Drug.drug_name.ilike(f"%{drug_name}%"))
         .group_by(age_groups, Reaction.reaction_medical_term)
         .order_by(age_groups, desc("count"))
