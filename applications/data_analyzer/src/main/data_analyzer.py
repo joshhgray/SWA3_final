@@ -5,15 +5,19 @@ from flask_cors import CORS
 import os
 
 def register_routes(app):
-    with app.app_context():
-        db.create_all()
+    """
+    Initialize the database (conditional).
+    """
+    if os.getenv("INIT_DB", "false").lower() == "true":
+        with app.app_context():
+            db.create_all()
 
-        # populate test db if in testing/debugging mode
-        if app.config["TESTING"] or os.getenv("TESTING") == "true":
-            # populate test database if empty
-            if not db.session.query(Drug).first():
-                from scripts.populate_test_db import populate_test_db
-                populate_test_db(app)
+            # populate test db if in testing/debugging mode
+            if app.config["TESTING"] or os.getenv("TESTING") == "true":
+                # populate test database if empty
+                if not db.session.query(Drug).first():
+                    from scripts.populate_test_db import populate_test_db
+                    populate_test_db(app)
 
     """
     Find the number of deaths associated with a given drug in the database
