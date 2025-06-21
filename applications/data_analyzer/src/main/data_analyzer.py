@@ -1,11 +1,17 @@
 from applications.data_collector.src.main.data_collector import db, create_app, AdverseEvent, Drug, Reaction
 from flask import Flask, request, jsonify
 from sqlalchemy import case, func, desc
+from flask_cors import CORS
 import os
 
-app = create_app(testing=True)
+app = create_app(testing=False)
+CORS(app)
 app.app_context().push()
 
+with app.app_context():
+    db.create_all()
+
+# populate test db if in testing/debugging mode
 if app.config["TESTING"] or os.getenv("TESTING") == "true":
     with app.app_context():
         db.create_all()
