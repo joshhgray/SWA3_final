@@ -68,6 +68,7 @@ def init_dash_app(server):
                 drug_names = res.json().get("drugs", [])
                 return [{"label": drug.title(), "value": drug} for drug in drug_names]
             else:
+                logging.warning(f"Top drugs request failed: {res.status_code}")
                 return []
         
         except Exception as e:
