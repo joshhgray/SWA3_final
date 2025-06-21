@@ -58,21 +58,22 @@ def register_routes(app):
     """
     Get the top 50 most common drugs in the database.
     """
+    def get_top_drugs(limit=50):
+        # function separated from route so it can be called in dash for dropdown menu
+        results = (
+            db.session.query(Drug.drug_name, func.count().label("count"))
+            .group_by(Drug.drug_name)
+            .order_by(func.count().desc())
+            .limit(limit)
+            .all()
+        )
+        return [drug[0] for drug in results]
+    
     @app.route("/top-drugs")
     def top_drugs():
         try:
             limit = request.args.get("limit", default=50, type=int)
-
-            results = (
-                db.session.query(Drug.drug_name, func.count().label("count"))
-                .group_by(Drug.drug_name)
-                .order_by(desc("count"))
-                .limit(limit)
-                .all()
-            )
-
-            drugs_list = [drug[0] for drug in results]
-            return jsonify({"drugs": drugs_list})
+            return jsonify({"drugs": get_top_drugs(limit)})
 
         except Exception as e:
             return jsonify({"Error": str(e)}), 500

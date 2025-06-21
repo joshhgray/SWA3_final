@@ -1,6 +1,7 @@
 def init_dash_app(server):
     from dash import Dash, dcc, html, Input, Output, State
     import dash_bootstrap_components as dbc
+    from data_analyzer.src.main.data_analyzer import get_top_drugs
     from dotenv import load_dotenv
     import plotly.express as px
     import pandas as pd
@@ -62,16 +63,10 @@ def init_dash_app(server):
             prevent_initial_call=False
     )
     def populate_dropdown(_):
-        logging.info("population dropdown fired")
         try:
-            res = requests.get(f"{BACKEND_API}/top-drugs?limit=50")
-            if res.status_code == 200:
-                drug_names = res.json().get("drugs", [])
-                return [{"label": drug.title(), "value": drug} for drug in drug_names]
-            else:
-                logging.warning(f"Top drugs request failed: {res.status_code}")
-                return []
-        
+            drug_names = get_top_drugs(50)
+            return [{"label": drug.title(), "value": drug} for drug in drug_names]
+
         except Exception as e:
             logging.error(f"Failed to fetch top drugs: {e}")
             return []
