@@ -4,6 +4,17 @@ from sqlalchemy import case, func, desc
 from flask_cors import CORS
 import os
 
+def get_top_drugs(limit=50):
+    # function separated from route so it can be called in dash for dropdown menu
+    results = (
+        db.session.query(Drug.drug_name, func.count().label("count"))
+        .group_by(Drug.drug_name)
+        .order_by(func.count().desc())
+        .limit(limit)
+        .all()
+    )
+    return [drug[0] for drug in results]
+    
 def register_routes(app):
     """
     Initialize the database (conditional).
@@ -58,17 +69,6 @@ def register_routes(app):
     """
     Get the top 50 most common drugs in the database.
     """
-    def get_top_drugs(limit=50):
-        # function separated from route so it can be called in dash for dropdown menu
-        results = (
-            db.session.query(Drug.drug_name, func.count().label("count"))
-            .group_by(Drug.drug_name)
-            .order_by(func.count().desc())
-            .limit(limit)
-            .all()
-        )
-        return [drug[0] for drug in results]
-    
     @app.route("/top-drugs")
     def top_drugs():
         try:
