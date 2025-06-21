@@ -11,7 +11,7 @@ class AppTest(unittest.TestCase):
         self.client = self.dash_app.server.test_client()
 
     def test_main(self):
-        res = self.app.get('/')
+        res = self.client.get('/')
         self.assertEqual(res.status_code, 200)
 
 if __name__ == "__main__":
