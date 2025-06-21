@@ -98,6 +98,11 @@ def init_dash_app(server):
             for key, val in reaction_data.items()
         ])
 
+        # order by age group
+        age_order = ["0-2", "3-5", "6-12", "13-18", "19-44", "45-64", "65-79", "80+"]
+        df_age["age_group"] = pd.Categorical(df_age["age_group"], categories=age_order, ordered=True)
+        df_reactions["age_group"] = pd.Categorical(df_reactions["age_group"], categories=age_order, ordered=True)
+
         fig1 = px.bar(df_age, x="age_group", y="count", title="Age Distribution of Reports")
         fig2 = px.bar(df_reactions, x="age_group", y="count", color="reaction", title="Top Reactions by Age Group")
 
