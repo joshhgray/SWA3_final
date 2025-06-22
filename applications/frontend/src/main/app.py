@@ -18,7 +18,7 @@ def init_dash_app(server):
     if TESTING:
         BACKEND_API = "http://127.0.0.1:5050"
     else: 
-        BACKEND_API = os.getenv("BACKEND_API", "https://swa-5ae147d163b6.herokuapp.com/")
+        BACKEND_API = os.getenv("BACKEND_API", "http://swa-5ae147d163b6.herokuapp.com/")
     logging.info(f"Using BACKEND_API = {BACKEND_API}")
 
     app = dash.Dash(__name__, server=server, external_stylesheets=[dbc.themes.COSMO])

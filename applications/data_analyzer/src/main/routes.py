@@ -2,6 +2,13 @@ from flask import request, jsonify
 from applications.data_collector.src.main.data_collector import db, AdverseEvent, Drug, Reaction
 from applications.data_analyzer.src.main.data_analyzer import get_top_drugs, get_age_distribution_for_drug, get_top_reactions_by_age
 import os
+from prometheus_client import Counter, generate_latest, CONTENT_TYPE_LATEST
+
+"""
+Prometheus Setup
+"""
+REQUEST_COUNT = Counter("http_requests_total", "Total HTTP requests", ["method", "endpoint", "http_status"])
+
 
 """
 ROUTES
@@ -20,6 +27,25 @@ def register_routes(app):
                 if not db.session.query(Drug).first():
                     from scripts.populate_test_db import populate_test_db
                     populate_test_db(app)
+
+    """
+    Prometheus request tracker
+    """
+    @app.after_request
+    def after_request(response):
+        REQUEST_COUNT.labels(
+            method=request.method,
+            endpoint=request.path,
+            http_status=response.status_code
+        ).inc()
+        return response
+    
+    """
+    Metrics
+    """
+    @app.route("/metrics")
+    def metrics():
+        return generate_latest(), 200, {'Content-Type': CONTENT_TYPE_LATEST}
 
 
     """
