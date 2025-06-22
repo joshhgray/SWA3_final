@@ -1,7 +1,6 @@
 venv/
 .env
-.env.*
-
 __pycache__/
 *.pkl
 .vscode/venv/
+*.py[cod]
