@@ -5,9 +5,8 @@ import random
 
 def populate_test_db(app, n_drugs=50):
     """
-    This function is for populating an in-memory temporary database used for testing and debugging.
+    This function is for populating an in-memory temporary database used for testing and debugging convienence.
     The database is filled with random data.
-    For debugging convenience.
 
     :param n_drugs: number of drugs to fill temp database with
     """

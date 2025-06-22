@@ -2,7 +2,6 @@ import unittest
 from applications.frontend.src.main.app import init_dash_app
 from applications.data_collector.src.main.data_collector import create_app
 
-
 class AppTest(unittest.TestCase):
 
     def setUp(self):

@@ -1,9 +1,16 @@
 from applications.data_collector.src.main.data_collector import db, AdverseEvent, Drug, Reaction
 from sqlalchemy import case, func, desc
-import os
 
+"""
+These functions are separated from routes so they can be called in dash
+"""
 def get_top_drugs(limit=50):
-    # function separated from route so it can be called in dash for dropdown menu
+    """
+    Get the most commonly found drugs in the database.
+
+    :param limit: Number of drugs to retreive (default 50).
+    :returns: List of drugs extracted from the database.
+    """
     results = (
         db.session.query(Drug.drug_name, func.count().label("count"))
         .group_by(Drug.drug_name)
@@ -14,7 +21,13 @@ def get_top_drugs(limit=50):
     return [drug[0] for drug in results]
 
 def get_age_distribution_for_drug(drug_name):
-    # split into age groups - based on MeSH - https://pmc.ncbi.nlm.nih.gov/articles/PMC1794003/
+    """
+    Find the age distribution for use of a given drug.
+
+    :param drug_name: Drug name as seen in database.
+    :returns: List of dictionaries containing age group and count of drug users.
+    """
+    # Split into age groups - based on MeSH - https://pmc.ncbi.nlm.nih.gov/articles/PMC1794003/
     age_groups = case(
         (AdverseEvent.patient_age <= 2, "0-2"),
         (AdverseEvent.patient_age <= 5, "3-5"),
@@ -39,7 +52,13 @@ def get_age_distribution_for_drug(drug_name):
     return [{"age_group": r[0], "count": r[1]} for r in results]
 
 def get_top_reactions_by_age(drug_name):
-    # split into age groups - based on MeSH - https://pmc.ncbi.nlm.nih.gov/articles/PMC1794003/
+    """
+    Find the most common reaction by age group for a given drug.
+
+    :param drug_name: Drug name as seen in database.
+    :returns: Dictionary containing reaction type and number of reported cases for each age group.
+    """
+    # Split into age groups - based on MeSH - https://pmc.ncbi.nlm.nih.gov/articles/PMC1794003/
     age_groups = case(
         (AdverseEvent.patient_age <= 2, "0-2"),
         (AdverseEvent.patient_age <= 5, "3-5"),

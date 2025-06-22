@@ -19,7 +19,7 @@ def create_app(testing=False):
     app = Flask(__name__)
 
     # Check testing mode
-    if testing is None: # get from env if not passed
+    if testing is None: # get from .env if not passed
         testing = os.getenv("TESTING", "false").lower() == "true"
     if testing:
         app.config['SQLALCHEMY_DATABASE_URI'] = "sqlite:///:memory:"

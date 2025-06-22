@@ -27,6 +27,7 @@ class TestDataCollector(unittest.TestCase):
         self.assertEqual(data[1]["safetyreportid"], "4318221-5")
 
     def test_process_data(self):
+        # Sample JSON result from openFDA API
         sample_input = [{
             "safetyreportid": "5801206-7",
             "receivedate": "20080707",

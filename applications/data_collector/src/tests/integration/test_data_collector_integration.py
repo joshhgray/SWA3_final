@@ -22,6 +22,7 @@ class TestDataCollectorIntegration(unittest.TestCase):
             db.drop_all()
 
     def test_fetch_process_save(self):
+        # Sample JSON result from openFDA API
         sample_input = [{
             "safetyreportid": "5801206-7",
             "receivedate": "20080707",

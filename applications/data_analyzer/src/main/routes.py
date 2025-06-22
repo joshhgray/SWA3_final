@@ -9,7 +9,6 @@ Prometheus Setup
 """
 REQUEST_COUNT = Counter("http_requests_total", "Total HTTP requests", ["method", "endpoint", "http_status"])
 
-
 """
 ROUTES
 """
@@ -108,12 +107,12 @@ def register_routes(app):
     """
     Health check
     """
-    # uptime check
+    # Uptime check
     @app.route("/health-check")
     def health_check():
         return jsonify({"status": "I'm healthy"}), 200
     
-    # datebase check
+    # Datebase check
     @app.route("/db-health-check")
     def db_health_check():
         try:

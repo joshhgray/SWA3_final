@@ -1,18 +1,22 @@
 def init_dash_app(server):
-    from dash import Dash, dcc, html, Input, Output, State
+    """
+    Initialize the dash app - combined and started with flask routes in main.py
+    """
+    from dash import Dash, dcc, html, Input, Output
     import dash_bootstrap_components as dbc
     from applications.data_analyzer.src.main.data_analyzer import get_top_drugs, get_top_reactions_by_age, get_age_distribution_for_drug
     from dotenv import load_dotenv
     import plotly.express as px
     import pandas as pd
     import logging
-    import requests
     import dash
     import os
 
     logging.basicConfig(level=logging.INFO)
 
-    # Set BACKEND_API based on debugging mode
+    """
+    Connect to real or testing BACKEND_API based on debugging mode.
+    """
     load_dotenv()
     TESTING = os.getenv("TESTING", "false").lower() == "true"
     if TESTING:
@@ -23,12 +27,10 @@ def init_dash_app(server):
 
     app = dash.Dash(__name__, server=server, external_stylesheets=[dbc.themes.COSMO])
 
-
     medical_disclaimer = html.Div(
         [
             dbc.Alert([
                 html.B("This application is for educational and demonstration purposes only. "),
-                "This application is for educational and demonstration purposes only. " \
                 " The data displayed is sourced from the openFDA public API and reflects " \
                 "real-world adverse event reports, but does NOT establish causation between " \
                 "any drug and reported outcomes.",
@@ -46,19 +48,16 @@ def init_dash_app(server):
         dbc.Row([medical_disclaimer]),
         html.H1("FDA adverse events explorer"),
 
-        # Body
+        # Drug selection dropdown
         dcc.Dropdown(
             id="drug-dropdown",
             options=[],
             placeholder="Select a drug",
-            #style={"width": "50%", "margin-bottom": 20px}
         ),
 
         # Visualizations
         dcc.Graph(id="age-chart"),
         dcc.Graph(id="reaction-chart"),
-
-        html.Div(id="output-container")
     ])
 
     @app.callback(
@@ -67,6 +66,9 @@ def init_dash_app(server):
             prevent_initial_call=False
     )
     def populate_dropdown(_):
+        """
+        Populate the dropdown menu with the top 50 most common drugs in the database.
+        """
         try:
             drug_names = get_top_drugs(50)
             return [{"label": drug.title(), "value": drug} for drug in drug_names]
@@ -82,6 +84,9 @@ def init_dash_app(server):
         Input("drug-dropdown", "value")
     )
     def update_visuals(drug_name):
+        """
+        Showcase some of the data from the analyzer with plotly, based on selected drug.
+        """
         if not drug_name:
             raise dash.exceptions.PreventUpdate
         
