@@ -1,6 +1,6 @@
 # FDA Adverse Events Explorer
 
-This project fetches real-world adverse drug event data from the [openFDA API](https://open.fda.gov/apis/drug/even/).
+This project fetches real-world adverse drug event data from the [openFDA API](https://open.fda.gov/apis/drug/event/).
 It is a modular micorservices architecture with:
 1. Data Collector - Fetches and stores event data from openFDA in a PostgreSQL relational database.
 2. Data Analyzer - Provides API endpoints for querying the database.
